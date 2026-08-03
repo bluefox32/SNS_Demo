@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SNS Builder - デモアプリ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background: white;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .nav-brand a {
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+        .nav-brand a:hover {
+            opacity: 1;
+        }
+
+        .nav-brand h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .nav-user {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .nav-user span {
+            font-size: 14px;
+        }
+
+        .demo-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .auth-container {
+            max-width: 400px;
+            margin: 40px auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+        }
+
+        .auth-form h2 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .auth-form > p {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #999;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        textarea {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="password"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .demo-users {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .demo-users p {
+            font-size: 14px;
+            margin-bottom: 12px;
+            color: #666;
+        }
+
+        .demo-user-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 8px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .demo-user-btn:hover {
+            background: #f8f9fa;
+            border-color: #667eea;
+        }
+
+        .feed-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .post-form,
+        .search-form {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .post-form h3 {
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+
+        .search-form {
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-form input {
+            flex: 1;
+        }
+
+        #feed {
+            min-height: 400px;
+        }
+
+        .post-item {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s;
+        }
+
+        .post-item:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .post-author {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .post-time {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .post-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .post-content {
+            font-size: 14px;
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .post-actions {
+            display: flex;
+            gap: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .post-action {
+            font-size: 13px;
+            color: #666;
+            cursor: pointer;
+            transition: color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .post-action:hover {
+            color: #667eea;
+        }
+
+        .loading {
+            text-align: center;
+            color: #999;
+            padding: 40px;
+            font-size: 14px;
+        }
+
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        button[id="logout-btn"] {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid white;
+            padding: 8px 16px;
+            font-size: 13px;
+        }
+
+        button[id="logout-btn"]:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .status-info {
+            text-align: center;
+            font-size: 12px;
+            color: #999;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <nav class="navbar">
+            <div class="nav-brand">
+                <h1>SNS Builder</h1>
+            </div>
+            <div class="nav-user">
+                <span id="current-user">ゲスト</span>
+                <button id="logout-btn" class="btn btn-secondary" style="display:none;">ログアウト</button>
+            </div>
+        </nav>
+
+        <div class="demo-content">
+            <!-- ログイン / 登録セクション -->
+            <div id="auth-section" class="auth-container">
+                <div class="auth-form">
+                    <h2>SNS デモへようこそ</h2>
+                    <p>まずはログインまたは登録してください</p>
+
+                    <div class="tabs">
+                        <button class="tab-btn active" data-tab="login">ログイン</button>
+                        <button class="tab-btn" data-tab="register">登録</button>
+                    </div>
+
+                    <!-- ログインフォーム -->
+                    <div id="login-tab" class="tab-content active">
+                        <form id="login-form">
+                            <input type="text" id="login-username" placeholder="ユーザー名" required>
+                            <input type="password" id="login-password" placeholder="パスワード" required>
+                            <button type="submit" class="btn btn-primary">ログイン</button>
+                        </form>
+                    </div>
+
+                    <!-- 登録フォーム -->
+                    <div id="register-tab" class="tab-content">
+                        <form id="register-form">
+                            <input type="text" id="register-username" placeholder="ユーザー名" required>
+                            <input type="email" id="register-email" placeholder="メールアドレス" required>
+                            <input type="password" id="register-password" placeholder="パスワード" required>
+                            <button type="submit" class="btn btn-primary">登録</button>
+                        </form>
+                    </div>
+
+                    <!-- デモユーザー -->
+                    <div class="demo-users">
+                        <p>デモユーザーで試す：</p>
+                        <button class="demo-user-btn" data-username="alice" data-password="password1">
+                            Alice（パスワード：password1）
+                        </button>
+                        <button class="demo-user-btn" data-username="bob" data-password="password2">
+                            Bob（パスワード：password2）
+                        </button>
+                    </div>
+
+                    <div class="status-info">
+                        HTML/JS スタンドアロン版 - ローカルストレージ使用
+                    </div>
+                </div>
+            </div>
+
+            <!-- メインフィード -->
+            <div id="main-section" style="display:none;">
+                <div class="feed-container">
+                    <!-- 投稿作成フォーム -->
+                    <div class="post-form">
+                        <h3>新しい投稿</h3>
+                        <form id="create-post-form">
+                            <input type="text" id="post-title" placeholder="タイトル" required>
+                            <textarea id="post-content" placeholder="本文を入力..." rows="4" required></textarea>
+                            <button type="submit" class="btn btn-primary">投稿</button>
+                        </form>
+                    </div>
+
+                    <!-- 検索フォーム -->
+                    <div class="search-form">
+                        <input type="text" id="search-query" placeholder="投稿を検索...">
+                        <button id="search-btn" class="btn btn-secondary">検索</button>
+                    </div>
+
+                    <!-- 投稿フィード -->
+                    <div id="feed" class="feed">
+                        <div class="loading">投稿を読み込み中...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * SNS Builder - HTML/JS スタンドアロン版
+         * localStorage を使用したローカルデータ管理
+         */
+
+        let currentUser = null;
+        let allUsers = [];
+        let allPosts = [];
+        let allLikes = [];
+
+        // ============ 初期化 ============
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDataFromStorage();
+            setupEventListeners();
+            loadUser();
+            loadPosts();
+        });
+
+        // ============ ストレージ管理 ============
+        function loadDataFromStorage() {
+            const stored = localStorage.getItem('snsData');
+            if (stored) {
+                const data = JSON.parse(stored);
+                allUsers = data.users || [];
+                allPosts = data.posts || [];
+                allLikes = data.likes || [];
+            } else {
+                // デモデータ初期化
+                initializeDemoData();
+            }
+        }
+
+        function saveDataToStorage() {
+            localStorage.setItem('snsData', JSON.stringify({
+                users: allUsers,
+                posts: allPosts,
+                likes: allLikes
+            }));
+        }
+
+        function initializeDemoData() {
+            allUsers = [
+                { id: 1, username: 'alice', email: 'alice@example.com', password: 'password1', created_at: new Date(Date.now() - 86400000).toISOString() },
+                { id: 2, username: 'bob', email: 'bob@example.com', password: 'password2', created_at: new Date(Date.now() - 172800000).toISOString() }
+            ];
+            
+            allPosts = [
+                { id: 1, user_id: 1, title: 'Python での Web アプリ開発', content: 'Flask と SQLAlchemy を使った Web アプリ開発について。', created_at: new Date(Date.now() - 3600000).toISOString(), updated_at: new Date(Date.now() - 3600000).toISOString(), like_count: 3, comment_count: 1 },
+                { id: 2, user_id: 2, title: 'JavaScript の最新トレンド', content: '2024年の JavaScript エコシステムの動向を解説します。', created_at: new Date(Date.now() - 7200000).toISOString(), updated_at: new Date(Date.now() - 7200000).toISOString(), like_count: 5, comment_count: 2 }
+            ];
+            
+            allLikes = [
+                { post_id: 1, user_id: 2 },
+                { post_id: 2, user_id: 1 }
+            ];
+
+            saveDataToStorage();
+        }
+
+        // ============ イベントリスナー設定 ============
+        function setupEventListeners() {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', switchTab);
+            });
+
+            document.getElementById('login-form').addEventListener('submit', handleLogin);
+            document.getElementById('register-form').addEventListener('submit', handleRegister);
+
+            document.querySelectorAll('.demo-user-btn').forEach(btn => {
+                btn.addEventListener('click', handleDemoUserLogin);
+            });
+
+            document.getElementById('create-post-form')?.addEventListener('submit', handleCreatePost);
+            document.getElementById('search-btn')?.addEventListener('click', handleSearch);
+            document.getElementById('logout-btn')?.addEventListener('click', handleLogout);
+        }
+
+        // ============ タブ切り替え ============
+        function switchTab(e) {
+            const tabName = e.target.dataset.tab;
+
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            e.target.classList.add('active');
+
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+        }
+
+        // ============ 認証処理 ============
+        function handleLogin(e) {
+            e.preventDefault();
+
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+
+            const user = allUsers.find(u => u.username === username && u.password === password);
+
+            if (!user) {
+                alert('ログイン失敗: ユーザー名またはパスワードが正しくありません');
+                return;
+            }
+
+            currentUser = { id: user.id, username: user.username, email: user.email };
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            showMainSection();
+            loadPosts();
+        }
+
+        function handleRegister(e) {
+            e.preventDefault();
+
+            const username = document.getElementById('register-username').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+
+            if (allUsers.find(u => u.username === username)) {
+                alert('登録失敗: このユーザー名は既に使用されています');
+                return;
+            }
+
+            if (allUsers.find(u => u.email === email)) {
+                alert('登録失敗: このメールアドレスは既に使用されています');
+                return;
+            }
+
+            const newUser = {
+                id: Math.max(...allUsers.map(u => u.id), 0) + 1,
+                username,
+                email,
+                password,
+                created_at: new Date().toISOString()
+            };
+
+            allUsers.push(newUser);
+            saveDataToStorage();
+
+            alert('登録成功! ログインしてください');
+            document.querySelector('[data-tab="login"]').click();
+            document.getElementById('register-form').reset();
+        }
+
+        function handleDemoUserLogin(e) {
+            const username = e.target.dataset.username;
+            const password = e.target.dataset.password;
+
+            document.getElementById('login-username').value = username;
+            document.getElementById('login-password').value = password;
+            document.getElementById('login-form').dispatchEvent(new Event('submit'));
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            localStorage.removeItem('currentUser');
+            location.reload();
+        }
+
+        // ============ UI 切り替え ============
+        function loadUser() {
+            const saved = localStorage.getItem('currentUser');
+            if (saved) {
+                currentUser = JSON.parse(saved);
+                showMainSection();
+            }
+        }
+
+        function showMainSection() {
+            document.getElementById('auth-section').style.display = 'none';
+            document.getElementById('main-section').style.display = 'block';
+            document.getElementById('current-user').textContent = currentUser.username;
+            document.getElementById('logout-btn').style.display = 'inline-block';
+        }
+
+        // ============ 投稿処理 ============
+        function handleCreatePost(e) {
+            e.preventDefault();
+
+            const title = document.getElementById('post-title').value;
+            const content = document.getElementById('post-content').value;
+
+            const newPost = {
+                id: Math.max(...allPosts.map(p => p.id), 0) + 1,
+                user_id: currentUser.id,
+                title,
+                content,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+                like_count: 0,
+                comment_count: 0
+            };
+
+            allPosts.unshift(newPost);
+            saveDataToStorage();
+
+            alert('投稿成功!');
+            document.getElementById('create-post-form').reset();
+            loadPosts();
+        }
+
+        // ============ フィード読み込み ============
+        function loadPosts() {
+            if (!currentUser) return;
+
+            renderPosts(allPosts);
+        }
+
+        // ============ 検索 ============
+        function handleSearch() {
+            const query = document.getElementById('search-query').value;
+
+            if (!query.trim()) {
+                loadPosts();
+                return;
+            }
+
+            const results = allPosts.filter(post => 
+                post.title.toLowerCase().includes(query.toLowerCase()) ||
+                post.content.toLowerCase().includes(query.toLowerCase())
+            );
+
+            renderPosts(results);
+        }
+
+        // ============ 投稿レンダリング ============
+        function renderPosts(posts) {
+            const feed = document.getElementById('feed');
+
+            if (posts.length === 0) {
+                feed.innerHTML = '<div class="loading">投稿がまだありません</div>';
+                return;
+            }
+
+            feed.innerHTML = posts.map(post => {
+                const author = allUsers.find(u => u.id === post.user_id);
+                return `
+                    <div class="post-item">
+                        <div class="post-header">
+                            <div>
+                                <div class="post-author">${author?.username || '不明なユーザー'}</div>
+                                <div class="post-time">${formatDate(post.created_at)}</div>
+                            </div>
+                        </div>
+                        <div class="post-title">${escapeHtml(post.title)}</div>
+                        <div class="post-content">${escapeHtml(post.content)}</div>
+                        <div class="post-actions">
+                            <div class="post-action" onclick="toggleLike(${post.id})">
+                                ❤️ <span class="like-count">${post.like_count}</span>
+                            </div>
+                            <div class="post-action">
+                                💬 <span>${post.comment_count}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ============ いいね処理 ============
+        function toggleLike(postId) {
+            const post = allPosts.find(p => p.id === postId);
+            const likeIndex = allLikes.findIndex(l => l.post_id === postId && l.user_id === currentUser.id);
+
+            if (likeIndex > -1) {
+                allLikes.splice(likeIndex, 1);
+                post.like_count--;
+            } else {
+                allLikes.push({ post_id: postId, user_id: currentUser.id });
+                post.like_count++;
+            }
+
+            saveDataToStorage();
+            loadPosts();
+        }
+
+        // ============ ユーティリティ ============
+        function formatDate(isoString) {
+            const date = new Date(isoString);
+            const now = new Date();
+            const diff = now - date;
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+
+            if (minutes < 1) return '今';
+            if (minutes < 60) return `${minutes}分前`;
+            if (hours < 24) return `${hours}時間前`;
+            if (days < 7) return `${days}日前`;
+
+            return date.toLocaleDateString('ja-JP');
+        }
+
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+    </script>
+</body>
+</html>
